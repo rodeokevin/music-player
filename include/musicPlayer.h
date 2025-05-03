@@ -9,6 +9,7 @@
 #include <thread>
 #include <atomic>
 #include <mutex>
+#include <unordered_map>
 
 using namespace std;
 namespace fs = std::filesystem;
@@ -19,18 +20,21 @@ class MusicPlayer {
     std::mutex musicMutex;
 
     const std::string musicFolder = "./music";
+    // Need a trie of paths for all the music
     std::vector<fs::path> playlist; // Vector of paths to the music files
-    
-
-    sf::Music music;
 
     std::thread pollThread;
-    std::atomic<bool> isRunning;
+    std::atomic<bool> isRunning = false;
     void pollLoop();      // Function run by the thread
 
     public:
 
+    sf::Music music;
     std::vector<size_t> playOrder;
+    std::vector<std::string> playlistNames;
+    std::unordered_map<std::string, std::vector<std::string>> playlists;
+    std::string currentPlaylist = "";
+    std::vector<std::string> currentPlaylistTracks;
 
     bool isPaused = true; // Start as paused
     bool isShuffled = false; // Start non-shuffled
@@ -40,6 +44,7 @@ class MusicPlayer {
     bool firstLoad = true;
     float prevVol = 100.0f;
     float vol = 100.0f;
+    string track = "";
     
     int currentTrackIndex = 0;
     int shuffledTrackIndex = -1;
@@ -47,6 +52,7 @@ class MusicPlayer {
     MusicPlayer(const std::string &musicFolder):musicFolder{musicFolder}{};
     ~MusicPlayer() { quit(); }
     void loadPlaylist();
+    void loadData();
     void shufflePlaylist();
     void loadTrack();
     void togglePlay();

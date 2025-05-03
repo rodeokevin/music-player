@@ -3,6 +3,8 @@
 #include <algorithm>
 #include <random>
 #include <filesystem>
+#include <fstream>
+#include <string>
 
 // Load the playlist
 void MusicPlayer::loadPlaylist() {
@@ -12,6 +14,60 @@ void MusicPlayer::loadPlaylist() {
         }
     }  
 }
+
+void MusicPlayer::loadData() {
+    std::ifstream file{"./music/playlists.txt"};
+    std::string line;
+    std::string current;
+    while (std::getline(file, line)) {
+        if (line.substr(0, 10) == ".PLAYLIST ") {
+            std::string name = line.substr(10);
+            playlistNames.push_back(name); // add a playlist
+            current = name;
+        }
+        else {
+            if (!line.empty()) {
+                playlists[current].push_back(line); // add track to the corresponding playlist
+            }
+        }
+    }
+}
+/*
+void MusicPlayer::loadPlaylistNames() {
+    std::ifstream file{"./music/playlists.txt"};
+    std::string line;
+    playlistNames.clear();
+
+    while (std::getline(file, line)) {
+        if (line.substr(0, 10) == ".PLAYLIST ") {
+            std::string name = line.substr(10);
+            playlistNames.push_back(name);
+        }
+    }
+}
+
+void MusicPlayer::loadPlaylistTracks() {
+    std::ifstream file{"./music/playlists.txt"};
+    std::string line;
+    bool found = false;
+
+    currentPlaylistTracks.clear();
+
+    while (std::getline(file, line)) {
+        if (line.substr(0, 10) == ".PLAYLIST ") {
+            if (!found) {
+                found = (line.substr(10) == currentPlaylist);
+            continue;
+            }
+            else break;
+        }
+        if (found && !line.empty()) {
+            currentPlaylistTracks.push_back(line);
+        }
+    }
+}
+*/
+
 
 void MusicPlayer::shufflePlaylist() {
     int n = playlist.size();
@@ -31,11 +87,14 @@ void MusicPlayer::loadTrack() {
     std::lock_guard<std::mutex> lock(musicMutex);
     if (isShuffled) {
         music.openFromFile(playlist[playOrder[shuffledTrackIndex]].string());
+        track = playlist[playOrder[shuffledTrackIndex]].stem().string();
     }
     else {
         music.openFromFile(playlist[currentTrackIndex].string());
+        track = playlist[currentTrackIndex].stem().string();
     }
 }
+
 
 void MusicPlayer::togglePlay() {
     std::lock_guard<std::mutex> lock(musicMutex);
@@ -159,13 +218,13 @@ void MusicPlayer::toggleTrackLoop() {
 }
 
 void MusicPlayer::increaseVol() {
-    vol = music.getVolume();
-    music.setVolume(std::min(vol + 5.0f, 100.0f));
+    vol = min(vol + 5.0f, 100.0f);
+    music.setVolume(vol);
 }
 
 void MusicPlayer::decreaseVol() {
-    vol = music.getVolume();
-    music.setVolume(std::max(vol - 5.0f, 0.0f));
+    vol = max(vol - 5.0f, 0.0f);
+    music.setVolume(vol);
 }
 
 void MusicPlayer::toggleMute() {
@@ -198,6 +257,7 @@ void MusicPlayer::poll() {
     pollThread = std::thread(&MusicPlayer::pollLoop, this);
 }
 
+// Private
 void MusicPlayer::pollLoop() {
     while (isRunning) {
         if (music.getStatus() == sf::Music::Status::Stopped && !firstLoad && !isPaused) {
