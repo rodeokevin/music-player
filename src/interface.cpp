@@ -28,10 +28,42 @@ void Interface::displayUI() {
     auto screen = ScreenInteractive::TerminalOutput();
 
     int playlistSelected = 0;
-    auto tab_menu = Menu(musicPlayer.playlistNames, &playlistSelected);
+    MenuOption menuOption;
+    menuOption.entries_option.transform = [&](const EntryState& s) {
+        bool isCurrentPlaylist = (s.index == musicPlayer.currentPlaylistIndex);
+        // std::string label = (isActivePlaylist ? "· " : "  ") + s.label;
+
+        Element prefix = text(isCurrentPlaylist ? "> " : "  ");
+        Element t = isCurrentPlaylist ? text(s.label) | color(Color::Gold1) : text(s.label);
+
+        // if (s.active) t |= underlined;
+        if (s.focused) t |= underlined;
+        return hbox({prefix, t});
+    };
+
+    auto tab_menu = Menu(&musicPlayer.playlistNames, &playlistSelected, menuOption);
 
     bool renderHelpPage = false;
 
+
+    RadioboxOption radioboxOption;
+    radioboxOption.transform = [&](const EntryState& s) {
+        // Get the currently visible playlist name
+        std::string activePlaylist = musicPlayer.playlistNames[playlistSelected];
+    
+        // Get the song at this entry
+        bool isCurrentSong = 
+            (musicPlayer.currentPlaylist == activePlaylist &&
+                s.index == musicPlayer.currentTrackIndex);
+        // std::cout << s.label << " vs " << musicPlayer.currentTrack + ".mp3" << std::endl;
+    
+        Element prefix = text(isCurrentSong ? "> " : "  ");
+        std::string entry = std::filesystem::path(s.label).stem().string();
+        Element t = isCurrentSong ? text(entry) | color(Color::Gold1) : text(entry);
+        // if (s.active) t |= underlined;
+        if (s.focused) t |= underlined;
+        return hbox({prefix, t});
+    };
    
     std::vector<Component> radioboxes;
     // Corresponding selected indices
@@ -40,7 +72,7 @@ void Interface::displayUI() {
     // Populate radioboxes and indices
     for (const auto& name : musicPlayer.playlistNames) {
         selected_indices.push_back(0); // default selected index per playlist
-        radioboxes.push_back(Radiobox(&musicPlayer.playlists[name], &selected_indices.back()));
+        radioboxes.push_back(Radiobox(&musicPlayer.playlists[name], &selected_indices.back(), radioboxOption));
     }
 
     auto songs = Container::Tab(radioboxes, &playlistSelected);
@@ -54,7 +86,7 @@ void Interface::displayUI() {
         std::string progress = formatTime(musicPlayer.music.getPlayingOffset()) +
                        " / " +
                        formatTime(musicPlayer.music.getDuration());
-        std::string track = musicPlayer.track.empty() ? "No track loaded" : musicPlayer.track;
+        std::string track = musicPlayer.currentTrack.empty() ? "No track loaded" : musicPlayer.currentTrack;
         std::string volume = "> Vol: " + std::to_string(static_cast<int>(musicPlayer.vol));
 
         return renderHelpPage ? (
@@ -69,7 +101,7 @@ void Interface::displayUI() {
             }) | flex
         ) : (
             vbox({
-                text(musicPlayer.track.empty() ? "No track loaded" : musicPlayer.track) | color(Color::Gold1),
+                text(musicPlayer.currentTrack.empty() ? "No track loaded" : musicPlayer.currentTrack) | color(Color::Gold1),
                 text("> " + progress),
                 text("> " + std::string(musicPlayer.isPaused ? "P" : " ") + " " +
                             std::string(musicPlayer.isShuffled ? "S" : " ") + " " +
@@ -103,7 +135,10 @@ void Interface::displayUI() {
     auto keyHandler = CatchEvent(renderer, [&](const Event& event) {
         if ((event == Event::Escape) && renderHelpPage) renderHelpPage = false;
         else if (event == Event::Character('p')) musicPlayer.togglePlay();
-        else if (event == Event::Character('n')) musicPlayer.nextTrack();
+        else if (event == Event::Character('n')) {
+            musicPlayer.nextTrack();
+            selected_indices[playlistSelected] = min(selected_indices[playlistSelected]+1, (int)(musicPlayer.playlists[musicPlayer.currentPlaylist]).size()-1);
+        }
         else if (event == Event::Character('b')) musicPlayer.prevTrack();
         else if (event == Event::Character('s')) musicPlayer.toggleShuffle();
         else if (event == Event::Character('l')) musicPlayer.togglePlaylistLoop();

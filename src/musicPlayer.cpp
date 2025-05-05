@@ -12,7 +12,7 @@ void MusicPlayer::loadPlaylist() {
         if (entry.path().extension() == ".mp3") {
             playlist.push_back(entry.path());
         }
-    }  
+    }
 }
 
 void MusicPlayer::loadData() {
@@ -68,9 +68,8 @@ void MusicPlayer::loadPlaylistTracks() {
 }
 */
 
-
 void MusicPlayer::shufflePlaylist() {
-    int n = playlist.size();
+    int n = playlists[currentPlaylist].size();
     playOrder.resize(n);
     for (int i = 0; i < playOrder.size(); i++) {
         playOrder[i] = i;
@@ -85,13 +84,16 @@ void MusicPlayer::shufflePlaylist() {
 
 void MusicPlayer::loadTrack() {
     std::lock_guard<std::mutex> lock(musicMutex);
+    std::string toLoad;
     if (isShuffled) {
-        music.openFromFile(playlist[playOrder[shuffledTrackIndex]].string());
-        track = playlist[playOrder[shuffledTrackIndex]].stem().string();
+        toLoad = musicFolder + playlists[currentPlaylist][playOrder[shuffledTrackIndex]];
+        music.openFromFile(toLoad);
+        currentTrack = std::filesystem::path(toLoad).stem().string();
     }
     else {
-        music.openFromFile(playlist[currentTrackIndex].string());
-        track = playlist[currentTrackIndex].stem().string();
+        toLoad = musicFolder + playlists[currentPlaylist][currentTrackIndex];
+        music.openFromFile(toLoad);
+        currentTrack = std::filesystem::path(toLoad).stem().string();
     }
 }
 
@@ -112,7 +114,7 @@ void MusicPlayer::nextTrack() {
     if (!isShuffled) {
         // If the playlist is looped
         if (isPlaylistLooped) {
-            currentTrackIndex = (currentTrackIndex + 1) % playlist.size();
+            currentTrackIndex = (currentTrackIndex + 1) % playlists[currentPlaylist].size();
             loadTrack();
             if (!isPaused) {
                 music.play();
@@ -124,7 +126,7 @@ void MusicPlayer::nextTrack() {
         // If the playlist is not looped
         else {
             // End of playlist
-            if (currentTrackIndex == playlist.size()-1) {
+            if (currentTrackIndex == playlists[currentPlaylist].size()-1) {
                 currentTrackIndex = 0;
                 loadTrack();
                 firstLoad = true;
@@ -146,7 +148,7 @@ void MusicPlayer::nextTrack() {
     // If shuffled
     else {
         // End of playlist
-        if (shuffledTrackIndex == playlist.size()-1) {
+        if (shuffledTrackIndex == playlists[currentPlaylist].size()-1) {
             shufflePlaylist();
             shuffledTrackIndex = 0;
             loadTrack();

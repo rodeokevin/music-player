@@ -33,7 +33,7 @@ class MusicPlayer {
     std::vector<size_t> playOrder;
     std::vector<std::string> playlistNames;
     std::unordered_map<std::string, std::vector<std::string>> playlists;
-    std::string currentPlaylist = "";
+    
     std::vector<std::string> currentPlaylistTracks;
 
     bool isPaused = true; // Start as paused
@@ -44,20 +44,24 @@ class MusicPlayer {
     bool firstLoad = true;
     float prevVol = 100.0f;
     float vol = 100.0f;
-    string track = "";
     
+    std::string currentTrack = "";
+    std::string currentPlaylist = "";
     int currentTrackIndex = 0;
+    int currentPlaylistIndex = 0;
     int shuffledTrackIndex = -1;
 
     MusicPlayer(const std::string &musicFolder):musicFolder{musicFolder}{};
     ~MusicPlayer() { quit(); }
     void loadPlaylist();
-    void loadData();
+    void loadData(); // Load the data at beginning
     void shufflePlaylist();
     void loadTrack();
     void togglePlay();
     void nextTrack();
     void prevTrack();
+
+
     void toggleShuffle();
     void togglePlaylistLoop();
     void toggleTrackLoop();

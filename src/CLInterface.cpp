@@ -35,7 +35,7 @@ void CLInterface::displayUI() {
         std::string progress = aformatTime(musicPlayer.music.getPlayingOffset()) +
                        " / " +
                        aformatTime(musicPlayer.music.getDuration());
-        std::string track = musicPlayer.track.empty() ? "No track loaded" : musicPlayer.track;
+        std::string track = musicPlayer.currentTrack.empty() ? "No track loaded" : musicPlayer.currentTrack;
         std::string volume = "> Vol: " + std::to_string(static_cast<int>(musicPlayer.vol));
 
         auto playlistMenu = Radiobox(&musicPlayer.playlistNames, &playlistIndex);
@@ -89,7 +89,7 @@ void CLInterface::displayUI() {
                 }) | flex
             ) : (
                 vbox({
-                    text(musicPlayer.track.empty() ? "No track loaded" : musicPlayer.track) | color(Color::Gold1),
+                    text(musicPlayer.currentTrack.empty() ? "No track loaded" : musicPlayer.currentTrack) | color(Color::Gold1),
                     text("> " + progress),
                     text("> " + std::string(musicPlayer.isPaused ? "P" : " ") + " " +
                                 std::string(musicPlayer.isShuffled ? "S" : " ") + " " +
