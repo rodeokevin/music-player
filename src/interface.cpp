@@ -6,6 +6,7 @@
 #include <codecvt>
 #include <locale>
 #include <string>
+#include <filesystem>
 #include "ftxui/component/captured_mouse.hpp"
 #include "ftxui/component/component.hpp"
 #include "ftxui/dom/elements.hpp"
@@ -27,7 +28,10 @@ using namespace ftxui;
 void Interface::displayUI() {
     auto screen = ScreenInteractive::TerminalOutput();
 
+
     int playlistSelected = 0;
+    int playlistIndex = 0;
+
     MenuOption menuOption;
     menuOption.entries_option.transform = [&](const EntryState& s) {
         bool isCurrentPlaylist = (s.index == musicPlayer.currentPlaylistIndex);
@@ -37,13 +41,19 @@ void Interface::displayUI() {
         Element t = isCurrentPlaylist ? text(s.label) | color(Color::Gold1) : text(s.label);
 
         // if (s.active) t |= underlined;
-        if (s.focused) t |= underlined;
+        if (s.focused) {
+            t |= underlined;
+            playlistIndex = s.index;
+        }
         return hbox({prefix, t});
     };
 
     auto tab_menu = Menu(&musicPlayer.playlistNames, &playlistSelected, menuOption);
 
     bool renderHelpPage = false;
+
+    int songsIndex = 0;
+    
 
 
     RadioboxOption radioboxOption;
@@ -61,7 +71,10 @@ void Interface::displayUI() {
         std::string entry = std::filesystem::path(s.label).stem().string();
         Element t = isCurrentSong ? text(entry) | color(Color::Gold1) : text(entry);
         // if (s.active) t |= underlined;
-        if (s.focused) t |= underlined;
+        if (s.focused) {
+            t |= underlined;
+            songsIndex = s.index;
+        }
         return hbox({prefix, t});
     };
    
@@ -122,9 +135,9 @@ void Interface::displayUI() {
     auto renderer = Renderer(layout, [&] {
         return vbox({
             hbox({
-                tab_menu->Render(),
+                tab_menu->Render() | yframe | size(HEIGHT, EQUAL, 5) | size(WIDTH, LESS_THAN, 15),
                 separatorHeavy(),
-                songs->Render() | yframe | size(HEIGHT, LESS_THAN, 5),
+                songs->Render() | yframe | size(HEIGHT, EQUAL, 5),
             }),
             separatorHeavy(),
             player_section->Render()
@@ -148,6 +161,47 @@ void Interface::displayUI() {
         else if (event == Event::Character('f')) musicPlayer.seekForward();
         else if (event == Event::Character('r')) musicPlayer.seekBackward();
         else if (event == Event::Character('h')) renderHelpPage = true;
+        else if (event == Event::Return) {
+            // Pressed enter on a playlist
+            if (tab_menu->Focused()) {
+                std::string prevPlaylist = musicPlayer.currentPlaylist;
+                playlistSelected = playlistIndex;
+                musicPlayer.currentPlaylist = musicPlayer.playlistNames[playlistSelected];
+                musicPlayer.currentPlaylistIndex = playlistSelected;
+                // Changes happen only if the playlist was different
+                if (prevPlaylist != musicPlayer.currentPlaylist) {
+                    musicPlayer.currentTrackIndex = 0;
+                    if (musicPlayer.isShuffled) musicPlayer.toggleShuffle();
+                    if (musicPlayer.isPlaylistLooped) musicPlayer.togglePlaylistLoop();
+                    musicPlayer.shufflePlaylist();
+                    musicPlayer.firstLoad = true;
+                    musicPlayer.loadTrack(true);
+                    musicPlayer.isPaused = true;
+                }
+            }
+            // Pressed enter on a song
+            else if (songs->Focused()) {
+                std::string prevPlaylist = musicPlayer.currentPlaylist;
+                musicPlayer.currentPlaylist = musicPlayer.playlistNames[playlistSelected];
+                musicPlayer.currentPlaylistIndex = playlistSelected;
+                musicPlayer.currentTrackIndex = songsIndex;
+                if (prevPlaylist != musicPlayer.currentPlaylist) {
+                    if (musicPlayer.isShuffled) musicPlayer.toggleShuffle();
+                    if (musicPlayer.isPlaylistLooped) musicPlayer.togglePlaylistLoop();
+                }
+                musicPlayer.shufflePlaylist();
+                musicPlayer.firstLoad = true;
+                musicPlayer.loadTrack(true);
+                if (musicPlayer.isPaused) {
+                    musicPlayer.togglePlay();
+                }
+                else {
+                    musicPlayer.music.play();
+                    musicPlayer.firstLoad = false;
+                }
+            }
+        }
+        
         else if (event == Event::Character('q')) {
             musicPlayer.quit();
             screen.Exit();    // exit FTXUI loop

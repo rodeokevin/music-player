@@ -6,15 +6,6 @@
 #include <fstream>
 #include <string>
 
-// Load the playlist
-void MusicPlayer::loadPlaylist() {
-    for (const auto& entry : std::filesystem::directory_iterator(musicFolder)) {
-        if (entry.path().extension() == ".mp3") {
-            playlist.push_back(entry.path());
-        }
-    }
-}
-
 void MusicPlayer::loadData() {
     std::ifstream file{"./music/playlists.txt"};
     std::string line;
@@ -29,6 +20,12 @@ void MusicPlayer::loadData() {
             if (!line.empty()) {
                 playlists[current].push_back(line); // add track to the corresponding playlist
             }
+        }
+    }
+    // Get all the songs
+    for (const auto& entry : std::filesystem::directory_iterator(musicFolder)) {
+        if (entry.path().extension() == ".mp3") {
+            files.push_back(entry.path().string());
         }
     }
 }
@@ -82,10 +79,10 @@ void MusicPlayer::shufflePlaylist() {
     shuffledTrackIndex = -1;
 }
 
-void MusicPlayer::loadTrack() {
+void MusicPlayer::loadTrack(bool setTrack) {
     std::lock_guard<std::mutex> lock(musicMutex);
     std::string toLoad;
-    if (isShuffled) {
+    if (isShuffled && !setTrack) {
         toLoad = musicFolder + playlists[currentPlaylist][playOrder[shuffledTrackIndex]];
         music.openFromFile(toLoad);
         currentTrack = std::filesystem::path(toLoad).stem().string();

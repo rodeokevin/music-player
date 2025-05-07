@@ -21,7 +21,7 @@ class MusicPlayer {
 
     const std::string musicFolder = "./music";
     // Need a trie of paths for all the music
-    std::vector<fs::path> playlist; // Vector of paths to the music files
+    std::vector<std::string> files; // Vector of the .mp3 files
 
     std::thread pollThread;
     std::atomic<bool> isRunning = false;
@@ -53,10 +53,9 @@ class MusicPlayer {
 
     MusicPlayer(const std::string &musicFolder):musicFolder{musicFolder}{};
     ~MusicPlayer() { quit(); }
-    void loadPlaylist();
     void loadData(); // Load the data at beginning
     void shufflePlaylist();
-    void loadTrack();
+    void loadTrack(bool setTrack = false);
     void togglePlay();
     void nextTrack();
     void prevTrack();
