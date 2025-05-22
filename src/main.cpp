@@ -13,10 +13,11 @@ int main() {
 
     MusicPlayer musicPlayer("./music/");
     // CLInterface clinterface(musicPlayer);
+    // std::cout << "test0" << std::endl;
     musicPlayer.loadData();
-
+    // std::cout << "test1" << std::endl;
     musicPlayer.currentPlaylist = musicPlayer.playlistNames[musicPlayer.currentPlaylistIndex];
-    
+    // std::cout << "test2" << std::endl;
     // musicPlayer.loadPlaylist();
     musicPlayer.shufflePlaylist();
     musicPlayer.loadTrack();
@@ -92,7 +93,7 @@ int main() {
     */
     
  
-     musicPlayer.quit();
+     // musicPlayer.quit();
      return 0;
 
 }

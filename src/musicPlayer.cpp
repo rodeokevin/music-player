@@ -23,11 +23,17 @@ void MusicPlayer::loadData() {
         }
     }
     // Get all the songs
+    /*
+    std::cout << "start" << std::endl;
     for (const auto& entry : std::filesystem::directory_iterator(musicFolder)) {
+        std::cout << entry << std::endl;
         if (entry.path().extension() == ".mp3") {
             files.push_back(entry.path().string());
         }
     }
+    std::cout << "end" << std::endl;
+    */
+    
 }
 /*
 void MusicPlayer::loadPlaylistNames() {

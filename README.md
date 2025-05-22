@@ -46,8 +46,6 @@ The template starts out very basic, but might receive additional features over t
    cmake --build build
    ```
 
-   The executable is in build/bin/Debug.
-
 9. Enjoy!
 
 ## Upgrading SFML
