@@ -9,7 +9,7 @@
 
 int main() {
 
-    MusicPlayer musicPlayer("./music/");
+    MusicPlayer musicPlayer("./music/"); 
     musicPlayer.loadData();
     musicPlayer.currentPlaylist = musicPlayer.playlistNames[musicPlayer.currentPlaylistIndex];
     musicPlayer.shufflePlaylist();
