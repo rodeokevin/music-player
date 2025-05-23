@@ -20,7 +20,6 @@ class MusicPlayer {
     std::mutex musicMutex;
 
     const std::string musicFolder = "./music";
-    // Need a trie of paths for all the music
     std::vector<std::string> files; // Vector of the .mp3 files
 
     std::thread pollThread;

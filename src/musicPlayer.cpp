@@ -22,54 +22,7 @@ void MusicPlayer::loadData() {
             }
         }
     }
-    // Get all the songs
-    /*
-    std::cout << "start" << std::endl;
-    for (const auto& entry : std::filesystem::directory_iterator(musicFolder)) {
-        std::cout << entry << std::endl;
-        if (entry.path().extension() == ".mp3") {
-            files.push_back(entry.path().string());
-        }
-    }
-    std::cout << "end" << std::endl;
-    */
-    
 }
-/*
-void MusicPlayer::loadPlaylistNames() {
-    std::ifstream file{"./music/playlists.txt"};
-    std::string line;
-    playlistNames.clear();
-
-    while (std::getline(file, line)) {
-        if (line.substr(0, 10) == ".PLAYLIST ") {
-            std::string name = line.substr(10);
-            playlistNames.push_back(name);
-        }
-    }
-}
-
-void MusicPlayer::loadPlaylistTracks() {
-    std::ifstream file{"./music/playlists.txt"};
-    std::string line;
-    bool found = false;
-
-    currentPlaylistTracks.clear();
-
-    while (std::getline(file, line)) {
-        if (line.substr(0, 10) == ".PLAYLIST ") {
-            if (!found) {
-                found = (line.substr(10) == currentPlaylist);
-            continue;
-            }
-            else break;
-        }
-        if (found && !line.empty()) {
-            currentPlaylistTracks.push_back(line);
-        }
-    }
-}
-*/
 
 void MusicPlayer::shufflePlaylist() {
     int n = playlists[currentPlaylist].size();

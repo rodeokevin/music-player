@@ -20,7 +20,7 @@ FetchContent_Declare(ftxui
     GIT_TAG main)
 FetchContent_MakeAvailable(ftxui)
 
-add_executable(main src/main.cpp src/musicPlayer.cpp src/CLInterface.cpp src/interface.cpp)
+add_executable(main src/main.cpp src/musicPlayer.cpp src/interface.cpp)
 
 target_include_directories(main PRIVATE include) 
 

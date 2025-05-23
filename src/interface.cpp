@@ -3,7 +3,6 @@
 #include <thread>
 #include <chrono>
 #include <sstream>
-#include <codecvt>
 #include <locale>
 #include <string>
 #include <filesystem>
