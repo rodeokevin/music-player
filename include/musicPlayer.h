@@ -42,7 +42,7 @@ private:
     int currentPlaylistIndex{0};
     std::vector<size_t> playOrder;
     std::vector<std::string> playlistNames;
-    std::unordered_map<std::string, std::vector<std::string>> playlists;
+    std::vector<std::vector<std::string>> playlists;
     std::vector<std::string> currentPlaylistTracks;
 
     // Track data
@@ -152,13 +152,14 @@ public:
         return playlistNames;
     }
 
-    std::vector<std::string> getPlaylistTracks(const std::string& playlistName) const {
+    std::vector<std::string> getPlaylistTracks(int playlistIndex) const {
         std::lock_guard<std::mutex> lock(musicMutex);
-        auto it = playlists.find(playlistName);
-        if (it != playlists.end()) {
-            return it->second; // Returns a copy
-        }
-        return {};
+        return playlists[playlistIndex];
+    }
+
+    int getCurrentPlaylistSize() const {
+        std::lock_guard<std::mutex> lock(musicMutex);
+        return playlists[currentPlaylistIndex].size();
     }
 
     // Setters
@@ -169,7 +170,7 @@ public:
     }
     void setCurrentPlaylistIndex(int playlistIndex) {
         std::lock_guard<std::mutex> lock(musicMutex);
-        currentPlaylist = playlistIndex;
+        currentPlaylistIndex = playlistIndex;
     }
     void setCurrentTrackIndex(int index) {
         std::lock_guard<std::mutex> lock(musicMutex);

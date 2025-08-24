@@ -38,7 +38,7 @@ set(WITH_ASF ON CACHE BOOL "Enable ASF support" FORCE)
 
 add_subdirectory(external/taglib)
 
-add_executable(main src/main.cpp src/musicPlayer.cpp src/interface.cpp)
+add_executable(main src/main.cpp src/musicPlayer.cpp)
 
 target_include_directories(main PRIVATE include 
                                         external/taglib/taglib

@@ -75,16 +75,12 @@ int main() {
     
     RadioboxOption radioboxOption;
     radioboxOption.transform = [&](const EntryState& s) {
-        // Get the currently visible playlist name
-        std::string activePlaylist = playlistNamesCopy[playlistSelected];
-    
-        // Get the song at this entry
-        std::string currentPlaylist = musicPlayer.getCurrentPlaylist();
+        int currentPlaylistIndex = musicPlayer.getCurrentPlaylistIndex();
         
         int currentTrackIndex = musicPlayer.getCurrentTrackIndex();
         
-        bool isCurrentSong = 
-            (currentPlaylist == activePlaylist && s.index == currentTrackIndex);
+        // Compare's FTXUI's playlistSelected and the MusicPlayer's currentPlaylistIndex
+        bool isCurrentSong = (playlistSelected == currentPlaylistIndex && s.index == currentTrackIndex);
     
         Element prefix = text(isCurrentSong ? "> " : "  ");
         std::string entry = std::filesystem::path(s.label).stem().string();
@@ -96,19 +92,15 @@ int main() {
         }
         return hbox({prefix, t});
     };
-   
-    std::vector<Component> radioboxes;
+    std::vector<Component> radioboxes(playlistNamesCopy.size());
     // Corresponding selected indices
-    std::vector<int> selected_indices;
+    std::vector<int> selected_indices(playlistNamesCopy.size(), 0);
 
     // Populate radioboxes and indices
-    std::vector<std::vector<std::string>> playlistTracksCopies;
-    for (const auto& name : playlistNamesCopy) {
-        selected_indices.push_back(0);
-        std::vector<std::string> tracks = musicPlayer.getPlaylistTracks(name);
-        
-        playlistTracksCopies.push_back(tracks); // Obtain a copy in a thread safe manner
-        radioboxes.push_back(Radiobox(&playlistTracksCopies.back(), &selected_indices.back(), radioboxOption));
+    std::vector<std::vector<std::string>> playlistsCopy(playlistNamesCopy.size());
+    for (int i = 0; i < playlistNamesCopy.size(); i++) {
+        playlistsCopy[i] = musicPlayer.getPlaylistTracks(i);
+        radioboxes[i] = Radiobox(&playlistsCopy[i], &selected_indices[i], radioboxOption);
     }
 
     auto songs = Container::Tab(radioboxes, &playlistSelected);
@@ -204,11 +196,9 @@ int main() {
             musicPlayer.nextTrack();
             
             // Not sure if this is needed?
-            std::string currentPlaylist = musicPlayer.getCurrentPlaylist();
+            int currentPlaylistIndex = musicPlayer.getCurrentPlaylistIndex();
             
-            auto currentPlaylistTracks = musicPlayer.getPlaylistTracks(currentPlaylist);
-            
-            selected_indices[playlistSelected] = std::min(selected_indices[playlistSelected]+1, (int)currentPlaylistTracks.size()-1);
+            selected_indices[playlistSelected] = std::min(selected_indices[playlistSelected]+1, musicPlayer.getCurrentPlaylistSize()-1);
         }
         else if (event == Event::Character('b')) {
             musicPlayer.prevTrack();
@@ -242,7 +232,7 @@ int main() {
             if (tab_menu->Focused()) {
                 // std::string prevPlaylist = musicPlayer.getCurrentPlaylist();
                 int prevPlaylistIndex = musicPlayer.getCurrentPlaylistIndex();
-                playlistSelected = playlistIndex;
+                playlistIndex = playlistSelected;
                 musicPlayer.setCurrentPlaylist(playlistNamesCopy[playlistSelected]);
                 musicPlayer.setCurrentPlaylistIndex(playlistSelected);
                 // Changes happen only if the playlist was different
@@ -263,6 +253,7 @@ int main() {
                 musicPlayer.setCurrentPlaylist(playlistNamesCopy[playlistSelected]);
                 musicPlayer.setCurrentPlaylistIndex(playlistSelected);
                 musicPlayer.setCurrentTrackIndex(songsIndex);
+                // If the playlist changed
                 if (prevPlaylistIndex != playlistSelected) {
                     musicPlayer.setShuffle(false);
                     musicPlayer.setPlaylistLooped(false);
