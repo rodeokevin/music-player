@@ -83,96 +83,77 @@ public:
     // Getters
     float getVol() const {
         std::lock_guard<std::mutex> lock(musicMutex);
-        std::cerr << "[musicPlayer] return vol" << std::endl;
         return vol;
     }
     float getPrevVol() const {
         std::lock_guard<std::mutex> lock(musicMutex);
-        std::cerr << "[musicPlayer] return prevVol" << std::endl;
         return prevVol;
     }
     sf::Time getDuration() const{
         std::lock_guard<std::mutex> lock(musicMutex);
-        std::cerr << "[musicPlayer] return duration" << std::endl;
         return music.getDuration();
     }
     sf::Time getCurrentPosition() const {
         std::lock_guard<std::mutex> lock(musicMutex);
-        std::cerr << "[musicPlayer] return position" << std::endl;
         return music.getPlayingOffset();
     }
     bool getPaused() const {
         std::lock_guard<std::mutex> lock(musicMutex);
-        std::cerr << "[musicPlayer] return isPaused" << std::endl;
         return isPaused;
     }
     bool getShuffled() const { 
         std::lock_guard<std::mutex> lock(musicMutex);
-        std::cerr << "[musicPlayer] return isShuffled" << std::endl;
         return isShuffled;
     }
     bool getPlaylistLooped() const {
         std::lock_guard<std::mutex> lock(musicMutex);
-        std::cerr << "[musicPlayer] return isLooped" << std::endl;
         return isPlaylistLooped;
     }
     bool getTrackLoop() const {
         std::lock_guard<std::mutex> lock(musicMutex);
-        std::cerr << "[musicPlayer] return isTrackLooped" << std::endl;
         return isTrackLooped;
     }
     bool getMuted() const {
         std::lock_guard<std::mutex> lock(musicMutex);
-        std::cerr << "[musicPlayer] return isMuted" << std::endl;
         return isMuted;
     }
     bool getFirstLoad() const {
         std::lock_guard<std::mutex> lock(musicMutex);
-        std::cerr << "[musicPlayer] return firstLoad" << std::endl;
         return firstLoad;
     }
 
     std::string getCurrentPlaylist() const {
         std::lock_guard<std::mutex> lock(musicMutex);
-        std::cerr << "[musicPlayer] return current playlist" << std::endl;
         return currentPlaylist;
     }
     int getCurrentPlaylistIndex() const {
-        std::cerr << "[musicPlayer] trying to return curr playlist index (pre-lock)" << std::endl;
         std::lock_guard<std::mutex> lock(musicMutex);
-        std::cerr << "[musicPlayer] return curr playlist index (post-lock)" << std::endl;
         return currentPlaylistIndex;
     }
     int getCurrentTrackIndex() const {
         std::lock_guard<std::mutex> lock(musicMutex);
-        std::cerr << "[musicPlayer] return current track index" << std::endl;
         return currentTrackIndex;
     }
     int getShuffledTrackIndex() const {
         std::lock_guard<std::mutex> lock(musicMutex);
-        std::cerr << "[musicPlayer] return shuffled track index" << std::endl;
         return shuffledTrackIndex;
     }
     std::string getCurrentTrack() const {
         std::lock_guard<std::mutex> lock(musicMutex);
-        std::cerr << "[musicPlayer] return current track" << std::endl;
         return currentTrack;
     }
     std::string getCurrentArtist() const {
         std::lock_guard<std::mutex> lock(musicMutex);
-        std::cerr << "[musicPlayer] return current artist" << std::endl;
         return currentArtist;
     }
 
     std::vector<std::string> getPlaylistNames() const {
         std::lock_guard<std::mutex> lock(musicMutex);
-        std::cerr << "[musicPlayer] return playlist names" << std::endl;
         return playlistNames;
     }
 
     std::vector<std::string> getPlaylistTracks(const std::string& playlistName) const {
         std::lock_guard<std::mutex> lock(musicMutex);
-        std::cerr << "[musicPlayer] return playlist tracks" << std::endl;
         auto it = playlists.find(playlistName);
         if (it != playlists.end()) {
             return it->second; // Returns a copy

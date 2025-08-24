@@ -35,7 +35,6 @@ void MusicPlayer::loadData(std::string musicFolder, std::string playlistPath) {
     musicFolder = musicFolder;
     std::ifstream file{playlistPath};
     if (!file) {
-        // std::cerr << "couldn't open playlists.txt file" << std::endl;
         return;
     }
     std::string line;
@@ -91,7 +90,6 @@ void MusicPlayer::loadTrack(bool setTrack) {
         toLoad = musicFolder + playlists[currentPlaylist][currentTrackIndex];
     }
     if (!music.openFromFile(toLoad)) {
-        // std::cerr << "could not load track" << std::endl;
         return;
     }
     currentTrack = getTitle(toLoad);
@@ -106,7 +104,6 @@ void MusicPlayer::loadTrackInternal() {
         toLoad = musicFolder + playlists[currentPlaylist][currentTrackIndex];
     }
     if (!music.openFromFile(toLoad)) {
-        // std::cerr << "could not load track internal" << std::endl;
         return;
     }
     currentTrack = getTitle(toLoad);
