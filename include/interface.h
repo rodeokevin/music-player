@@ -12,17 +12,18 @@ class Interface {
 
     MusicPlayer& musicPlayer;
 
-    public:
+public:
+    ftxui::ScreenInteractive screen = ftxui::ScreenInteractive::TerminalOutput();
+    //  = ScreenInteractive::TerminalOutput();
     std::vector<std::string> stuff;
     int currentSelection = 0;
 
     std::thread uiThread;
     std::atomic<bool> isRunning = false;
 
-    public:
     bool isHelpPage = false;
     Interface(MusicPlayer& player):musicPlayer(player) {}
-
+    void constructUI();
     void displayUI();
 };
 
